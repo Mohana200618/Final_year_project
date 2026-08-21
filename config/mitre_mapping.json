@@ -1,0 +1,136 @@
+{
+  "_comment": "MITRE ATT&CK mapping for ThreatScope. Each key is a CICIDS2017 label. Techniques sourced from MITRE ATT&CK v14 (https://attack.mitre.org). Do not fabricate technique IDs.",
+  "BENIGN": {
+    "tactic": null,
+    "technique_id": null,
+    "technique_name": "Normal Traffic",
+    "description": "No malicious activity detected.",
+    "reference": null
+  },
+  "DDoS": {
+    "tactic": "Impact",
+    "technique_id": "T1498",
+    "technique_name": "Network Denial of Service",
+    "sub_technique_id": "T1498.001",
+    "sub_technique_name": "Direct Network Flood",
+    "description": "Adversary performs a volumetric flood from a botnet or single source to exhaust target bandwidth or connection tables.",
+    "reference": "https://attack.mitre.org/techniques/T1498/"
+  },
+  "DoS Hulk": {
+    "tactic": "Impact",
+    "technique_id": "T1499",
+    "technique_name": "Endpoint Denial of Service",
+    "sub_technique_id": "T1499.002",
+    "sub_technique_name": "Service Exhaustion Flood",
+    "description": "HTTP-based flood tool (Hulk) exhausts web server resources by generating unique GET requests that bypass caches.",
+    "reference": "https://attack.mitre.org/techniques/T1499/"
+  },
+  "DoS GoldenEye": {
+    "tactic": "Impact",
+    "technique_id": "T1499",
+    "technique_name": "Endpoint Denial of Service",
+    "sub_technique_id": "T1499.002",
+    "sub_technique_name": "Service Exhaustion Flood",
+    "description": "Layer-7 HTTP DoS tool that keeps connections alive using Keep-Alive headers to exhaust server connection pools.",
+    "reference": "https://attack.mitre.org/techniques/T1499/"
+  },
+  "DoS slowloris": {
+    "tactic": "Impact",
+    "technique_id": "T1499",
+    "technique_name": "Endpoint Denial of Service",
+    "sub_technique_id": "T1499.002",
+    "sub_technique_name": "Service Exhaustion Flood",
+    "description": "Slowloris sends partial HTTP requests to hold connections open indefinitely, exhausting the server's connection pool.",
+    "reference": "https://attack.mitre.org/techniques/T1499/"
+  },
+  "DoS Slowhttptest": {
+    "tactic": "Impact",
+    "technique_id": "T1499",
+    "technique_name": "Endpoint Denial of Service",
+    "sub_technique_id": "T1499.002",
+    "sub_technique_name": "Service Exhaustion Flood",
+    "description": "Slow HTTP attack tool similar to Slowloris but targets POST body or Range headers to hold server connections.",
+    "reference": "https://attack.mitre.org/techniques/T1499/"
+  },
+  "PortScan": {
+    "tactic": "Reconnaissance",
+    "technique_id": "T1046",
+    "technique_name": "Network Service Discovery",
+    "sub_technique_id": null,
+    "sub_technique_name": null,
+    "description": "Adversary scans for open ports and running services to map the network and identify attack surfaces.",
+    "reference": "https://attack.mitre.org/techniques/T1046/"
+  },
+  "FTP-Patator": {
+    "tactic": "Credential Access",
+    "technique_id": "T1110",
+    "technique_name": "Brute Force",
+    "sub_technique_id": "T1110.001",
+    "sub_technique_name": "Password Guessing",
+    "description": "Patator tool used to brute-force FTP credentials through repeated login attempts.",
+    "reference": "https://attack.mitre.org/techniques/T1110/"
+  },
+  "SSH-Patator": {
+    "tactic": "Credential Access",
+    "technique_id": "T1110",
+    "technique_name": "Brute Force",
+    "sub_technique_id": "T1110.001",
+    "sub_technique_name": "Password Guessing",
+    "description": "Patator tool used to brute-force SSH credentials through repeated login attempts.",
+    "reference": "https://attack.mitre.org/techniques/T1110/"
+  },
+  "Bot": {
+    "tactic": "Command and Control",
+    "technique_id": "T1071",
+    "technique_name": "Application Layer Protocol",
+    "sub_technique_id": "T1071.001",
+    "sub_technique_name": "Web Protocols",
+    "description": "Botnet client communicating with C2 infrastructure. May also perform scanning, credential theft, or spam.",
+    "reference": "https://attack.mitre.org/techniques/T1071/"
+  },
+  "Web Attack - Brute Force": {
+    "tactic": "Credential Access",
+    "technique_id": "T1110",
+    "technique_name": "Brute Force",
+    "sub_technique_id": "T1110.003",
+    "sub_technique_name": "Password Spraying",
+    "description": "Web-based brute force attack against authentication forms (HTTP POST).",
+    "reference": "https://attack.mitre.org/techniques/T1110/"
+  },
+  "Web Attack - XSS": {
+    "tactic": "Initial Access",
+    "technique_id": "T1189",
+    "technique_name": "Drive-by Compromise",
+    "sub_technique_id": null,
+    "sub_technique_name": null,
+    "description": "Cross-Site Scripting injection into web application inputs to execute malicious scripts in victim browsers.",
+    "reference": "https://attack.mitre.org/techniques/T1189/"
+  },
+  "Web Attack - SQL Injection": {
+    "tactic": "Collection",
+    "technique_id": "T1213",
+    "technique_name": "Data from Information Repositories",
+    "sub_technique_id": null,
+    "sub_technique_name": null,
+    "description": "SQL injection attacks to extract, modify, or delete data from back-end databases.",
+    "reference": "https://attack.mitre.org/techniques/T1213/"
+  },
+  "Heartbleed": {
+    "tactic": "Collection",
+    "technique_id": "T1040",
+    "technique_name": "Network Sniffing",
+    "sub_technique_id": null,
+    "sub_technique_name": null,
+    "description": "Exploitation of CVE-2014-0160 (OpenSSL Heartbleed) to read server memory, potentially exposing private keys and credentials.",
+    "reference": "https://attack.mitre.org/techniques/T1040/"
+  },
+  "Infiltration": {
+    "tactic": "Lateral Movement",
+    "technique_id": "T1210",
+    "technique_name": "Exploitation of Remote Services",
+    "sub_technique_id": null,
+    "sub_technique_name": null,
+    "description": "Adversary exploits a vulnerability to gain foothold inside the network and moves laterally.",
+    "reference": "https://attack.mitre.org/techniques/T1210/"
+  }
+}

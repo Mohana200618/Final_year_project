@@ -1,0 +1,25 @@
+# Python & Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Datasets & Large Files (GitHub rejects files > 100MB)
+dataset/
+cleaned_dataset/
+training_data/
+*.csv
+*.pcap
+*.pcapng
+
+# Logs & Runtime files
+demo/live_conn.log
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
