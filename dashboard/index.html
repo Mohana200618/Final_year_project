@@ -1,267 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ThreatScope — AI Security Operations Center</title>
-  <meta name="description" content="ThreatScope: AI-powered predictive behavioral security and decision-support system for SOC analysts." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="dashboard.css" />
+  <meta charset="UTF-8">
+  <title>ThreatScope SOC | Advanced Demo</title>
+  <link rel="stylesheet" href="dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- ======================================================
-       HEADER / NAVBAR
-       ====================================================== -->
-  <header class="navbar" id="navbar">
+
+  <!-- TOP NAVBAR -->
+  <header class="navbar">
     <div class="navbar-brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="16" cy="16" r="14" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="4 2"/>
-          <circle cx="16" cy="16" r="7"  fill="none" stroke="#00d4ff" stroke-width="1.5"/>
-          <circle cx="16" cy="16" r="2.5" fill="#00d4ff"/>
-          <line x1="16" y1="2"  x2="16" y2="9"  stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="16" y1="23" x2="16" y2="30" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="2"  y1="16" x2="9"  y2="16" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="23" y1="16" x2="30" y2="16" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div>
-        <span class="brand-name">ThreatScope</span>
-        <span class="brand-tagline">AI Security Operations Center</span>
+      <div class="brand-logo">TS</div>
+      <div class="brand-title">
+        <h1>ThreatScope</h1>
+        <span class="brand-tagline">AI SECURITY OPERATIONS CENTER</span>
       </div>
     </div>
-    <nav class="navbar-status" id="navStatus">
-      <div class="status-item" id="statusPipeline">
-        <span class="status-dot dot-warning"></span>
+    <nav class="navbar-status" id="navStatus" style="display: flex; gap: 20px; align-items: center;">
+      <div class="status-item" id="statusPipeline" style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-secondary);">
+        <span class="status-dot dot-error" style="width: 8px; height: 8px; border-radius: 50%; background: var(--sev-critical);"></span>
         <span>Pipeline</span>
       </div>
-      <div class="status-item" id="statusXgb">
-        <span class="status-dot dot-warning"></span>
+      <div class="status-item" id="statusXgb" style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-secondary);">
+        <span class="status-dot dot-error" style="width: 8px; height: 8px; border-radius: 50%; background: var(--sev-critical);"></span>
         <span>XGBoost</span>
       </div>
-      <div class="status-item" id="statusIF">
-        <span class="status-dot dot-warning"></span>
+      <div class="status-item" id="statusIF" style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-secondary);">
+        <span class="status-dot dot-error" style="width: 8px; height: 8px; border-radius: 50%; background: var(--sev-critical);"></span>
         <span>Isolation Forest</span>
       </div>
-      <div class="navbar-time" id="navTime">--:--:--</div>
     </nav>
   </header>
 
-  <!-- ======================================================
-       MAIN LAYOUT
-       ====================================================== -->
-  <main class="main-layout">
-
-    <!-- ---- LEFT SIDEBAR ---- -->
-    <aside class="sidebar" id="sidebar">
-
-      <!-- Risk Score Widget -->
-      <section class="card risk-card" id="riskCard">
-        <div class="card-header">
-          <span class="card-icon">⚡</span>
-          <h2 class="card-title">Risk Score</h2>
-        </div>
-        <div class="risk-gauge-wrap">
-          <svg class="risk-gauge" viewBox="0 0 120 70" id="riskGaugeSvg">
-            <!-- Background arc -->
-            <path d="M10,65 A55,55 0 0,1 110,65" fill="none" stroke="#1e2a3a" stroke-width="10" stroke-linecap="round"/>
-            <!-- Score arc (animated) -->
-            <path id="riskArc" d="M10,65 A55,55 0 0,1 110,65" fill="none" stroke="#00d4ff" stroke-width="10" stroke-linecap="round"
-                  stroke-dasharray="173" stroke-dashoffset="173" style="transition:stroke-dashoffset 1s ease,stroke 0.5s"/>
-            <!-- Needle -->
-            <line id="riskNeedle" x1="60" y1="65" x2="60" y2="20"
-                  stroke="#fff" stroke-width="2" stroke-linecap="round"
-                  style="transform-origin:60px 65px; transform:rotate(0deg); transition:transform 1s ease"/>
-            <circle cx="60" cy="65" r="4" fill="#fff"/>
-          </svg>
-          <div class="risk-score-display">
-            <span class="risk-number" id="riskNumber">--</span>
-            <span class="risk-label" id="riskLabel">–</span>
-          </div>
-        </div>
-        <div class="risk-breakdown" id="riskBreakdown">
-          <div class="breakdown-row"><span>Anomaly</span><div class="breakdown-bar"><div class="bar-fill" id="brkAnomaly" style="width:0%"></div></div></div>
-          <div class="breakdown-row"><span>Attack Type</span><div class="breakdown-bar"><div class="bar-fill" id="brkAttack"  style="width:0%"></div></div></div>
-          <div class="breakdown-row"><span>Confidence</span><div class="breakdown-bar"><div class="bar-fill" id="brkConf"   style="width:0%"></div></div></div>
-          <div class="breakdown-row"><span>Stage</span><div class="breakdown-bar"><div class="bar-fill" id="brkStage"   style="width:0%"></div></div></div>
-          <div class="breakdown-row"><span>Next Stage</span><div class="breakdown-bar"><div class="bar-fill" id="brkNext"    style="width:0%"></div></div></div>
-        </div>
-      </section>
-
-      <!-- Attack Classification -->
-      <section class="card" id="classCard">
-        <div class="card-header">
-          <span class="card-icon">🎯</span>
-          <h2 class="card-title">Classification</h2>
-        </div>
-        <div class="class-label" id="classLabel">Awaiting data…</div>
-        <div class="class-conf">
-          <span>Confidence</span>
-          <div class="conf-bar-wrap"><div class="conf-bar" id="confBar" style="width:0%"></div></div>
-          <span id="confPct">--</span>
-        </div>
-        <div class="anomaly-row">
-          <span>Anomaly Score</span>
-          <span class="anomaly-badge" id="anomalyBadge">--</span>
-        </div>
-      </section>
-
-      <!-- MITRE Technique -->
-      <section class="card" id="mitreCard">
-        <div class="card-header">
-          <span class="card-icon">🛡</span>
-          <h2 class="card-title">MITRE ATT&amp;CK</h2>
-        </div>
-        <div class="mitre-tactic" id="mitreTactic">–</div>
-        <div class="mitre-technique" id="mitreTech">–</div>
-        <a class="mitre-link" id="mitreLink" href="#" target="_blank" rel="noopener">View on ATT&amp;CK ↗</a>
-      </section>
-
-    </aside>
-
-    <!-- ---- CENTER PANEL ---- -->
-    <section class="center-panel">
-
-      <!-- Demo Controls -->
-      <div class="demo-bar" id="demoBar">
-        <div class="demo-title">
-          <span class="demo-dot" id="demoDot"></span>
-          <span id="demoStatusText">Demo Ready</span>
-        </div>
-        <div class="demo-controls">
-          <label class="toggle-switch">
-            <input type="checkbox" id="modeToggle" onchange="toggleMode()">
-            <span class="slider"></span>
-            <span class="toggle-label" id="modeLabel">Demo Mode</span>
-          </label>
-          <button class="btn btn-primary" id="btnStartDemo" onclick="startDemo()">▶ Start Demo Replay</button>
-          <button class="btn btn-secondary" id="btnStopDemo" onclick="stopDemo()" disabled>■ Stop</button>
-          <button class="btn btn-ghost" onclick="clearAlerts()">Clear</button>
-        </div>
+  <div class="app-container">
+    <!-- LEFT NAVIGATION -->
+    <nav class="app-sidebar">
+      <ul class="nav-menu">
+        <li><a href="#/dashboard" class="nav-item active"><span class="icon">🎯</span> Dashboard</a></li>
+        <li><a href="#/scanning" class="nav-item"><span class="icon">🔍</span> Scanning</a></li>
+        <li><a href="#/risk" class="nav-item"><span class="icon">📈</span> Risk Analysis</a></li>
+        <li><a href="#/mitre" class="nav-item"><span class="icon">🛡️</span> MITRE ATT&CK</a></li>
+        <li><a href="#/attack-chain" class="nav-item"><span class="icon">🔗</span> Attack Chain</a></li>
+        <li><a href="#/recommendations" class="nav-item"><span class="icon">💡</span> Actions</a></li>
+      </ul>
+      <div class="nav-footer">
+        <button id="btnDemoToggle" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;">Start Demo</button>
+        <button id="btnDemoStop" class="btn btn-danger" style="width: 100%; display: none;">Stop Demo</button>
       </div>
+    </nav>
 
-      <!-- Alert Feed -->
-      <div class="card alerts-panel" id="alertsPanel">
-        <div class="card-header">
-          <span class="card-icon">📡</span>
-          <h2 class="card-title">Live Alert Feed</h2>
-          <span class="alert-count badge" id="alertCount">0</span>
-        </div>
-        <div class="alert-feed" id="alertFeed">
-          <div class="alert-empty">
-            <div class="empty-icon">📊</div>
-            <p>No alerts yet.<br/>Start a demo replay or submit flow data to the API.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Attack Timeline -->
-      <div class="card timeline-card" id="timelineCard">
-        <div class="card-header">
-          <span class="card-icon">📈</span>
-          <h2 class="card-title">Attack Timeline</h2>
-        </div>
-        <div class="timeline-wrap" id="timelineWrap">
-          <canvas id="timelineCanvas" height="100"></canvas>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- ---- RIGHT PANEL ---- -->
-    <aside class="right-panel">
-
-      <!-- Attack Chain -->
-      <section class="card" id="chainCard">
-        <div class="card-header">
-          <span class="card-icon">🔗</span>
-          <h2 class="card-title">Attack Chain</h2>
-        </div>
-        <div class="chain-stages" id="chainStages">
-          <div class="chain-stage inactive" data-stage="NORMAL" data-tooltip="Normal Traffic: No attack activity detected.">Normal</div>
-          <div class="chain-arrow">↓</div>
-          <div class="chain-stage inactive" data-stage="RECONNAISSANCE" data-tooltip="Recon: Attacker is gathering info and scanning for vulnerabilities.">Recon</div>
-          <div class="chain-arrow">↓</div>
-          <div class="chain-stage inactive" data-stage="INITIAL_ACCESS" data-tooltip="Initial Access: Attacker is trying to break into the network.">Initial Access</div>
-          <div class="chain-arrow">↓</div>
-          <div class="chain-stage inactive" data-stage="COMMAND_AND_CONTROL" data-tooltip="C2: Attacker compromised a system and communicates with it remotely.">C2</div>
-          <div class="chain-arrow">↓</div>
-          <div class="chain-stage inactive" data-stage="LATERAL_MOVEMENT" data-tooltip="Lateral Move: Attacker is moving through the internal network.">Lateral Move</div>
-          <div class="chain-arrow">↓</div>
-          <div class="chain-stage inactive" data-stage="IMPACT" data-tooltip="Impact: Attacker is disrupting services or destroying data.">Impact</div>
-        </div>
-        <div class="chain-prediction" id="chainPrediction">
-          <div class="pred-row">
-            <span>Next Stage</span>
-            <span class="pred-stage" id="predNext">–</span>
-            <span class="pred-prob" id="predNextProb">–</span>
-          </div>
-          <div class="pred-row">
-            <span>Alternative</span>
-            <span class="pred-stage alt" id="predAlt">–</span>
-            <span class="pred-prob" id="predAltProb">–</span>
-          </div>
-          <p class="pred-note">Predictions based on Markov chain — advisory only.</p>
-        </div>
-      </section>
-
-      <!-- Recommendations -->
-      <section class="card recs-card" id="recsCard">
-        <div class="card-header">
-          <span class="card-icon">💡</span>
-          <h2 class="card-title">Recommendations</h2>
-        </div>
-        <div class="recs-list" id="recsList">
-          <p class="recs-empty">Awaiting classification…</p>
-        </div>
-        <div class="disclaimer" id="disclaimer"></div>
-      </section>
-
-      <!-- Feature Vector -->
-      <section class="card" id="featuresCard">
-        <div class="card-header">
-          <span class="card-icon">🔢</span>
-          <h2 class="card-title">Feature Vector</h2>
-        </div>
-        <table class="feature-table" id="featureTable">
-          <tbody id="featureTableBody">
-            <tr class="feat-empty"><td colspan="2">No flow selected</td></tr>
-          </tbody>
-        </table>
-      </section>
-
-    </aside>
-
-  </main>
-
-  <!-- ======================================================
-       INVESTIGATION HISTORY MODAL
-       ====================================================== -->
-  <div class="history-bar" id="historyBar">
-    <button class="btn btn-ghost history-toggle" onclick="toggleHistory()" id="historyToggle">
-      📋 Investigation History (<span id="historyCount">0</span>)
-    </button>
-  </div>
-  <div class="history-panel" id="historyPanel" style="display:none">
-    <div class="history-header">
-      <h3>Investigation History</h3>
-      <button class="btn btn-ghost" onclick="exportHistory()">⬇ Export JSON</button>
-      <button class="btn btn-ghost" onclick="toggleHistory()">✕</button>
-    </div>
-    <div class="history-table-wrap">
-      <table class="history-table" id="historyTable">
-        <thead>
-          <tr>
-            <th>#</th><th>Time</th><th>Scenario</th><th>Label</th>
-            <th>Risk</th><th>Severity</th><th>Stage</th><th>MITRE</th>
-          </tr>
-        </thead>
-        <tbody id="historyBody"></tbody>
-      </table>
+    <!-- MAIN CONTENT AREA -->
+    <div id="pageContainer" class="page-container">
+      <!-- Pages render here -->
     </div>
   </div>
 
   <script src="dashboard.js"></script>
+  <script src="router.js"></script>
+  
+  <script src="pages/dashboard.js"></script>
+  <script src="pages/scanning.js"></script>
+  <script src="pages/risk.js"></script>
+  <script src="pages/mitre.js"></script>
+  <script src="pages/attack_chain.js"></script>
+  <script src="pages/recommendations.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      TS.boot();
+
+      // Poll status and update dots
+      setInterval(async () => {
+        try {
+          const res = await fetch('http://127.0.0.1:5000/api/status');
+          if(res.ok) {
+            const s = await res.json();
+            const setDot = (id, ok) => {
+              const el = document.querySelector(`#${id} .status-dot`);
+              if (el) {
+                el.style.background = ok ? 'var(--sev-low)' : 'var(--sev-critical)';
+                el.style.boxShadow = ok ? '0 0 8px rgba(34,197,94,0.5)' : 'none';
+              }
+            };
+            setDot('statusPipeline', s.pipeline_ready);
+            setDot('statusXgb', s.xgb_available);
+            setDot('statusIF', s.if_present);
+          }
+        } catch(e) {}
+      }, 5000);
+      
+      // trigger immediate check
+      fetch('http://127.0.0.1:5000/api/status').then(r=>r.json()).then(s=>{
+        const setDot = (id, ok) => {
+          const el = document.querySelector(`#${id} .status-dot`);
+          if (el) {
+            el.style.background = ok ? 'var(--sev-low)' : 'var(--sev-critical)';
+            el.style.boxShadow = ok ? '0 0 8px rgba(34,197,94,0.5)' : 'none';
+          }
+        };
+        setDot('statusPipeline', s.pipeline_ready);
+        setDot('statusXgb', s.xgb_available);
+        setDot('statusIF', s.if_present);
+      }).catch(e=>{});
+    });
+  </script>
 </body>
 </html>
