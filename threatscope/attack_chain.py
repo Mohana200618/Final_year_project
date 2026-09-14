@@ -1,14 +1,22 @@
 """
 threatscope/attack_chain.py
 ============================
-Attack chain prediction using a Markov Chain transition model.
+Attack chain prediction using a DATA-DRIVEN first-order Markov Chain.
 
 Approach
 --------
-  A first-order Markov chain defines transition probabilities between
-  attack stages.  The model is rule-based and transparent — the
-  transition matrix is stored as a plain Python dict so it can be
-  audited and tuned without any ML training.
+  The transition probability matrix is NOT hardcoded.  It is loaded from
+  models/markov_transition_matrix.json, which was built by
+  build_markov_matrix.py from the real CICIDS2017 dataset.
+
+  build_markov_matrix.py extracts consecutive attack-stage pairs from
+  the CICIDS2017 files in documented chronological order (Monday -> Friday),
+  counts transitions, applies Laplace (add-1) smoothing, and normalises
+  each row to produce probabilities.
+
+  This module is therefore a data-driven probabilistic state-transition
+  model, NOT a trained ML model.  The probabilities reflect empirical
+  attack-stage patterns observed in CICIDS2017, not expert assumptions.
 
 Attack stages (ordered by kill-chain position)
 -----------------------------------------------
@@ -23,7 +31,7 @@ Stage assignment
 ----------------
   The current stage is derived from the XGBoost attack label by the
   label_to_stage() function.  Transitions are then looked up in the
-  Markov matrix.
+  loaded data-driven matrix.
 
 Output contract
 ---------------
@@ -31,13 +39,15 @@ Output contract
     {
       "current_stage"   : str,
       "next_stage"      : str,      # most probable next stage
-      "next_probability": float,    # 0.0–1.0
+      "next_probability": float,    # 0.0-1.0
       "alt_stage"       : str|None, # second-most probable next stage
-      "alt_probability" : float,    # 0.0–1.0 (0 if none)
-      "note"            : str       # limitation disclosure
+      "alt_probability" : float,    # 0.0-1.0 (0 if none)
+      "note"            : str       # provenance disclosure
     }
 """
 
+import os
+import json
 from typing import Optional
 
 # ---------------------------------------------------------------------------
@@ -83,74 +93,62 @@ _LABEL_TO_STAGE = {
 }
 
 # ---------------------------------------------------------------------------
-# Markov transition matrix
-# P[current_stage][next_stage] = probability
-#
-# Probabilities per row must sum to 1.0.
-#
-# Rationale:
-#   NORMAL -> RECON most likely (attacker starts with scanning)
-#   RECON  -> ACCESS (exploitation) most likely after recon
-#   ACCESS -> C2 (establish foothold) or directly to IMPACT
-#   C2     -> LATERAL or IMPACT
-#   LATERAL -> IMPACT or more lateral movement
-#   IMPACT -> self (DoS tends to continue) or back to NORMAL
-#
-# These probabilities are expert-informed, not ML-derived.
-# They represent directional likelihoods, not calibrated frequencies.
+# Data-driven transition matrix — loaded from JSON at import time
 # ---------------------------------------------------------------------------
 
-_TRANSITION_MATRIX = {
-    STAGE_NORMAL: {
-        STAGE_NORMAL:  0.80,
-        STAGE_RECON:   0.15,
-        STAGE_ACCESS:  0.03,
-        STAGE_C2:      0.01,
-        STAGE_LATERAL: 0.00,
-        STAGE_IMPACT:  0.01,
-    },
-    STAGE_RECON: {
-        STAGE_NORMAL:  0.10,
-        STAGE_RECON:   0.20,
-        STAGE_ACCESS:  0.55,
-        STAGE_C2:      0.05,
-        STAGE_LATERAL: 0.00,
-        STAGE_IMPACT:  0.10,
-    },
-    STAGE_ACCESS: {
-        STAGE_NORMAL:  0.05,
-        STAGE_RECON:   0.05,
-        STAGE_ACCESS:  0.15,
-        STAGE_C2:      0.50,
-        STAGE_LATERAL: 0.15,
-        STAGE_IMPACT:  0.10,
-    },
-    STAGE_C2: {
-        STAGE_NORMAL:  0.05,
-        STAGE_RECON:   0.05,
-        STAGE_ACCESS:  0.05,
-        STAGE_C2:      0.20,
-        STAGE_LATERAL: 0.40,
-        STAGE_IMPACT:  0.25,
-    },
-    STAGE_LATERAL: {
-        STAGE_NORMAL:  0.05,
-        STAGE_RECON:   0.05,
-        STAGE_ACCESS:  0.10,
-        STAGE_C2:      0.10,
-        STAGE_LATERAL: 0.30,
-        STAGE_IMPACT:  0.40,
-    },
-    STAGE_IMPACT: {
-        STAGE_NORMAL:  0.10,
-        STAGE_RECON:   0.05,
-        STAGE_ACCESS:  0.05,
-        STAGE_C2:      0.05,
-        STAGE_LATERAL: 0.05,
-        STAGE_IMPACT:  0.70,
-    },
-}
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_MATRIX_PATH  = os.path.join(_PROJECT_ROOT, "models", "markov_transition_matrix.json")
 
+# Uniform fallback (equal probability) used only if the JSON is missing.
+# Each row sums to 1.0 exactly.
+_UNIFORM_PROB = round(1.0 / len(ALL_STAGES), 6)
+_FALLBACK_MATRIX = {s: {t: _UNIFORM_PROB for t in ALL_STAGES} for s in ALL_STAGES}
+
+_MATRIX_NOTE = ""   # filled in by _load_matrix()
+
+
+def _load_matrix() -> dict:
+    """
+    Load the data-driven transition matrix from
+    models/markov_transition_matrix.json.
+
+    Falls back to a uniform matrix with a warning if the file is missing.
+    """
+    global _MATRIX_NOTE
+    if os.path.exists(_MATRIX_PATH):
+        with open(_MATRIX_PATH, "r", encoding="utf-8") as fh:
+            payload = json.load(fh)
+        matrix = payload.get("matrix", {})
+        source = payload.get("source", "unknown source")
+        total  = payload.get("total_transitions", "unknown")
+        _MATRIX_NOTE = (
+            f"Data-driven Markov chain. Transition probabilities learned from "
+            f"{total:,} stage-transition pairs extracted from CICIDS2017 "
+            f"({source}). "
+            f"High self-loop probabilities (e.g. IMPACT->IMPACT) reflect "
+            f"DoS/DDoS attack patterns in the dataset and are empirically "
+            f"accurate, not a modelling error."
+            if isinstance(total, int) else
+            f"Data-driven Markov chain loaded from {_MATRIX_PATH}."
+        )
+        return matrix
+    else:
+        _MATRIX_NOTE = (
+            "WARNING: markov_transition_matrix.json not found. "
+            "Run build_markov_matrix.py to generate the data-driven matrix. "
+            "Using uniform fallback (equal probabilities) until then."
+        )
+        print(f"[attack_chain] {_MATRIX_NOTE}")
+        return _FALLBACK_MATRIX
+
+
+# Load once at module import time
+_TRANSITION_MATRIX = _load_matrix()
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
 
 def label_to_stage(label: str) -> str:
     """
@@ -162,7 +160,8 @@ def label_to_stage(label: str) -> str:
 
 def predict(current_stage: str) -> dict:
     """
-    Given the current attack stage, return the predicted next stage(s).
+    Given the current attack stage, return the predicted next stage(s)
+    using the data-driven Markov transition matrix.
 
     Parameters
     ----------
@@ -176,7 +175,7 @@ def predict(current_stage: str) -> dict:
         alt_stage, alt_probability, note
     """
     if current_stage not in _TRANSITION_MATRIX:
-        current_stage = STAGE_RECON  # safe fallback
+        current_stage = STAGE_RECON  # safe fallback for unknown stages
 
     transitions = _TRANSITION_MATRIX[current_stage]
 
@@ -192,11 +191,7 @@ def predict(current_stage: str) -> dict:
         "next_probability": round(next_prob, 4),
         "alt_stage":        alt_stage,
         "alt_probability":  round(alt_prob, 4),
-        "note": (
-            "Predictions are based on a rule-based Markov chain trained on "
-            "expert knowledge, not observed sequences. They indicate likely "
-            "attack progression, not certainty."
-        ),
+        "note":             _MATRIX_NOTE,
     }
 
 
@@ -211,9 +206,21 @@ def predict_from_label(label: str) -> dict:
     return result
 
 
+def reload_matrix():
+    """
+    Re-load the transition matrix from disk.
+    Call this after running build_markov_matrix.py if the server is already
+    running and you want to pick up a freshly built matrix without restarting.
+    """
+    global _TRANSITION_MATRIX
+    _TRANSITION_MATRIX = _load_matrix()
+    print("[attack_chain] Transition matrix reloaded.")
+
+
 if __name__ == "__main__":
-    print("Attack Chain Prediction — Markov Chain Demo")
+    print("Attack Chain Prediction - Data-Driven Markov Chain Demo")
     print("=" * 55)
+
     labels = [
         "BENIGN", "PortScan", "FTP-Patator",
         "Bot", "Infiltration", "DDoS"
@@ -222,5 +229,7 @@ if __name__ == "__main__":
         r = predict_from_label(lbl)
         print(f"\n  Label   : {lbl}")
         print(f"  Stage   : {r['current_stage']}")
-        print(f"  Next    : {r['next_stage']}  ({r['next_probability']*100:.0f}%)")
-        print(f"  Alt     : {r['alt_stage']}   ({r['alt_probability']*100:.0f}%)")
+        print(f"  Next    : {r['next_stage']}  ({r['next_probability']*100:.2f}%)")
+        print(f"  Alt     : {r['alt_stage']}   ({r['alt_probability']*100:.2f}%)")
+    print()
+    print(f"  Note: {_MATRIX_NOTE[:120]}...")

@@ -1,0 +1,115 @@
+{
+  "matrix": {
+    "NORMAL": {
+      "NORMAL": 0.166667,
+      "RECONNAISSANCE": 0.166667,
+      "INITIAL_ACCESS": 0.166667,
+      "COMMAND_AND_CONTROL": 0.166667,
+      "LATERAL_MOVEMENT": 0.166667,
+      "IMPACT": 0.166667
+    },
+    "RECONNAISSANCE": {
+      "NORMAL": 6e-06,
+      "RECONNAISSANCE": 0.999969,
+      "INITIAL_ACCESS": 6e-06,
+      "COMMAND_AND_CONTROL": 6e-06,
+      "LATERAL_MOVEMENT": 6e-06,
+      "IMPACT": 6e-06
+    },
+    "INITIAL_ACCESS": {
+      "NORMAL": 7.2e-05,
+      "RECONNAISSANCE": 7.2e-05,
+      "INITIAL_ACCESS": 0.998989,
+      "COMMAND_AND_CONTROL": 7.2e-05,
+      "LATERAL_MOVEMENT": 7.2e-05,
+      "IMPACT": 0.000722
+    },
+    "COMMAND_AND_CONTROL": {
+      "NORMAL": 0.000507,
+      "RECONNAISSANCE": 0.000507,
+      "INITIAL_ACCESS": 0.000507,
+      "COMMAND_AND_CONTROL": 0.997463,
+      "LATERAL_MOVEMENT": 0.000507,
+      "IMPACT": 0.000507
+    },
+    "LATERAL_MOVEMENT": {
+      "NORMAL": 0.02439,
+      "RECONNAISSANCE": 0.02439,
+      "INITIAL_ACCESS": 0.02439,
+      "COMMAND_AND_CONTROL": 0.02439,
+      "LATERAL_MOVEMENT": 0.878049,
+      "IMPACT": 0.02439
+    },
+    "IMPACT": {
+      "NORMAL": 3e-06,
+      "RECONNAISSANCE": 3e-06,
+      "INITIAL_ACCESS": 2.6e-05,
+      "COMMAND_AND_CONTROL": 3e-06,
+      "LATERAL_MOVEMENT": 3e-06,
+      "IMPACT": 0.999963
+    }
+  },
+  "raw_counts": {
+    "NORMAL": {
+      "NORMAL": 0,
+      "RECONNAISSANCE": 0,
+      "INITIAL_ACCESS": 0,
+      "COMMAND_AND_CONTROL": 0,
+      "LATERAL_MOVEMENT": 0,
+      "IMPACT": 0
+    },
+    "RECONNAISSANCE": {
+      "NORMAL": 0,
+      "RECONNAISSANCE": 161108,
+      "INITIAL_ACCESS": 0,
+      "COMMAND_AND_CONTROL": 0,
+      "LATERAL_MOVEMENT": 0,
+      "IMPACT": 0
+    },
+    "INITIAL_ACCESS": {
+      "NORMAL": 0,
+      "RECONNAISSANCE": 0,
+      "INITIAL_ACCESS": 13836,
+      "COMMAND_AND_CONTROL": 0,
+      "LATERAL_MOVEMENT": 0,
+      "IMPACT": 9
+    },
+    "COMMAND_AND_CONTROL": {
+      "NORMAL": 0,
+      "RECONNAISSANCE": 0,
+      "INITIAL_ACCESS": 0,
+      "COMMAND_AND_CONTROL": 1965,
+      "LATERAL_MOVEMENT": 0,
+      "IMPACT": 0
+    },
+    "LATERAL_MOVEMENT": {
+      "NORMAL": 0,
+      "RECONNAISSANCE": 0,
+      "INITIAL_ACCESS": 0,
+      "COMMAND_AND_CONTROL": 0,
+      "LATERAL_MOVEMENT": 35,
+      "IMPACT": 0
+    },
+    "IMPACT": {
+      "NORMAL": 0,
+      "RECONNAISSANCE": 0,
+      "INITIAL_ACCESS": 9,
+      "COMMAND_AND_CONTROL": 0,
+      "LATERAL_MOVEMENT": 0,
+      "IMPACT": 380677
+    }
+  },
+  "total_transitions": 557639,
+  "total_attack_rows": 557646,
+  "source": "CICIDS2017 data-driven - transition counts extracted from consecutive attack-labelled rows within each scenario file, processed in documented chronological order (Mon-Fri). BENIGN rows excluded. Laplace (add-1) smoothing applied.",
+  "smoothing": "Laplace (add-1)",
+  "stage_order": [
+    "NORMAL",
+    "RECONNAISSANCE",
+    "INITIAL_ACCESS",
+    "COMMAND_AND_CONTROL",
+    "LATERAL_MOVEMENT",
+    "IMPACT"
+  ],
+  "build_timestamp": "2026-09-14T15:01:05.885029Z"
+}
