@@ -12,6 +12,8 @@ import os
 import json
 from typing import Optional
 
+from threatscope.attack_chain import MITRE_TACTICS
+
 # Default config path relative to the project root
 _DEFAULT_CONFIG = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -43,6 +45,17 @@ class MitreMapper:
         self._mapping = {
             k: v for k, v in raw.items() if not k.startswith("_")
         }
+        invalid_tactics = sorted({
+            value.get("tactic")
+            for value in self._mapping.values()
+            if value.get("tactic") is not None
+            and value.get("tactic").upper().replace(" ", "_") not in MITRE_TACTICS
+        })
+        if invalid_tactics:
+            raise ValueError(
+                "MITRE mapping contains unsupported tactics: "
+                f"{invalid_tactics}"
+            )
 
     def get(self, label: str) -> dict:
         """

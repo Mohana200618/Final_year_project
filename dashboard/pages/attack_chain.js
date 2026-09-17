@@ -1,5 +1,24 @@
 'use strict';
 
+const MITRE_STAGES = [
+  ['NORMAL', 'Normal'],
+  ['RECONNAISSANCE', 'Reconnaissance'],
+  ['RESOURCE_DEVELOPMENT', 'Resource Development'],
+  ['INITIAL_ACCESS', 'Initial Access'],
+  ['EXECUTION', 'Execution'],
+  ['PERSISTENCE', 'Persistence'],
+  ['PRIVILEGE_ESCALATION', 'Privilege Escalation'],
+  ['STEALTH', 'Stealth'],
+  ['DEFENSE_IMPAIRMENT', 'Defense Impairment'],
+  ['CREDENTIAL_ACCESS', 'Credential Access'],
+  ['DISCOVERY', 'Discovery'],
+  ['LATERAL_MOVEMENT', 'Lateral Movement'],
+  ['COLLECTION', 'Collection'],
+  ['COMMAND_AND_CONTROL', 'Command and Control'],
+  ['EXFILTRATION', 'Exfiltration'],
+  ['IMPACT', 'Impact']
+];
+
 TS.pages = TS.pages || {};
 
 TS.pages.attack_chain = {
@@ -12,19 +31,10 @@ TS.pages.attack_chain = {
 
         <section class="card" style="background: var(--bg-card); border-radius: var(--radius); padding: 40px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center;">
           
-          <div class="chain-stages-horizontal" id="pageChainStages" style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 800px; margin-bottom: 50px;">
-            <!-- Stages will be populated via JS -->
-            <div class="h-stage inactive" data-stage="NORMAL">Normal</div>
-            <div class="h-arrow">→</div>
-            <div class="h-stage inactive" data-stage="RECONNAISSANCE">Recon</div>
-            <div class="h-arrow">→</div>
-            <div class="h-stage inactive" data-stage="INITIAL_ACCESS">Initial Access</div>
-            <div class="h-arrow">→</div>
-            <div class="h-stage inactive" data-stage="COMMAND_AND_CONTROL">C2</div>
-            <div class="h-arrow">→</div>
-            <div class="h-stage inactive" data-stage="LATERAL_MOVEMENT">Lateral Move</div>
-            <div class="h-arrow">→</div>
-            <div class="h-stage inactive" data-stage="IMPACT">Impact</div>
+          <div class="chain-stages-horizontal" id="pageChainStages" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; width: 100%; max-width: 950px; margin-bottom: 40px;">
+            ${MITRE_STAGES.map(([key, label], index) =>
+              `<div class="h-stage inactive" data-stage="${key}">${label}</div>${index < MITRE_STAGES.length - 1 ? '<div class="h-arrow">→</div>' : ''}`
+            ).join('')}
           </div>
 
           <style>
@@ -69,7 +79,7 @@ TS.pages.attack_chain = {
     if (!chain) return;
     const current = chain.current_stage;
     const predicted = chain.next_stage;
-    const STAGE_LABELS = { NORMAL: 'Normal', RECONNAISSANCE: 'Recon', INITIAL_ACCESS: 'Initial Access', COMMAND_AND_CONTROL: 'C2', LATERAL_MOVEMENT: 'Lateral Move', IMPACT: 'Impact' };
+    const STAGE_LABELS = Object.fromEntries(MITRE_STAGES);
 
     document.querySelectorAll('#pageChainStages .h-stage').forEach(el => {
       const s = el.dataset.stage;

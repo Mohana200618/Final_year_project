@@ -54,21 +54,47 @@ from typing import Optional
 # Stage constants
 # ---------------------------------------------------------------------------
 
-STAGE_NORMAL    = "NORMAL"
-STAGE_RECON     = "RECONNAISSANCE"
-STAGE_ACCESS    = "INITIAL_ACCESS"
-STAGE_C2        = "COMMAND_AND_CONTROL"
-STAGE_LATERAL   = "LATERAL_MOVEMENT"
-STAGE_IMPACT    = "IMPACT"
+STAGE_NORMAL = "NORMAL"
+STAGE_RECON = "RECONNAISSANCE"
+STAGE_RESOURCE_DEVELOPMENT = "RESOURCE_DEVELOPMENT"
+STAGE_INITIAL_ACCESS = "INITIAL_ACCESS"
+STAGE_EXECUTION = "EXECUTION"
+STAGE_PERSISTENCE = "PERSISTENCE"
+STAGE_PRIVILEGE_ESCALATION = "PRIVILEGE_ESCALATION"
+STAGE_STEALTH = "STEALTH"
+STAGE_DEFENSE_IMPAIRMENT = "DEFENSE_IMPAIRMENT"
+STAGE_CREDENTIAL_ACCESS = "CREDENTIAL_ACCESS"
+STAGE_DISCOVERY = "DISCOVERY"
+STAGE_LATERAL_MOVEMENT = "LATERAL_MOVEMENT"
+STAGE_COLLECTION = "COLLECTION"
+STAGE_COMMAND_AND_CONTROL = "COMMAND_AND_CONTROL"
+STAGE_EXFILTRATION = "EXFILTRATION"
+STAGE_IMPACT = "IMPACT"
 
-ALL_STAGES = [
-    STAGE_NORMAL,
+MITRE_TACTICS = [
     STAGE_RECON,
-    STAGE_ACCESS,
-    STAGE_C2,
-    STAGE_LATERAL,
+    STAGE_RESOURCE_DEVELOPMENT,
+    STAGE_INITIAL_ACCESS,
+    STAGE_EXECUTION,
+    STAGE_PERSISTENCE,
+    STAGE_PRIVILEGE_ESCALATION,
+    STAGE_STEALTH,
+    STAGE_DEFENSE_IMPAIRMENT,
+    STAGE_CREDENTIAL_ACCESS,
+    STAGE_DISCOVERY,
+    STAGE_LATERAL_MOVEMENT,
+    STAGE_COLLECTION,
+    STAGE_COMMAND_AND_CONTROL,
+    STAGE_EXFILTRATION,
     STAGE_IMPACT,
 ]
+
+# Backwards-compatible aliases for callers using previous short names
+STAGE_ACCESS = STAGE_INITIAL_ACCESS
+STAGE_C2 = STAGE_COMMAND_AND_CONTROL
+STAGE_LATERAL = STAGE_LATERAL_MOVEMENT
+
+ALL_STAGES = [STAGE_NORMAL] + MITRE_TACTICS
 
 # ---------------------------------------------------------------------------
 # CICIDS2017 label -> attack stage mapping
@@ -77,12 +103,12 @@ ALL_STAGES = [
 _LABEL_TO_STAGE = {
     "BENIGN":                      STAGE_NORMAL,
     "PortScan":                    STAGE_RECON,
-    "FTP-Patator":                 STAGE_ACCESS,
-    "SSH-Patator":                 STAGE_ACCESS,
-    "Web Attack - Brute Force":    STAGE_ACCESS,
-    "Web Attack - XSS":            STAGE_ACCESS,
-    "Web Attack - SQL Injection":  STAGE_ACCESS,
-    "Heartbleed":                  STAGE_ACCESS,
+    "FTP-Patator":                 STAGE_CREDENTIAL_ACCESS,
+    "SSH-Patator":                 STAGE_CREDENTIAL_ACCESS,
+    "Web Attack - Brute Force":    STAGE_CREDENTIAL_ACCESS,
+    "Web Attack - XSS":            STAGE_INITIAL_ACCESS,
+    "Web Attack - SQL Injection":  STAGE_COLLECTION,
+    "Heartbleed":                  STAGE_COLLECTION,
     "Bot":                         STAGE_C2,
     "Infiltration":                STAGE_LATERAL,
     "DoS Hulk":                    STAGE_IMPACT,
@@ -119,19 +145,27 @@ def _load_matrix() -> dict:
         with open(_MATRIX_PATH, "r", encoding="utf-8") as fh:
             payload = json.load(fh)
         matrix = payload.get("matrix", {})
-        source = payload.get("source", "unknown source")
-        total  = payload.get("total_transitions", "unknown")
-        _MATRIX_NOTE = (
-            f"Data-driven Markov chain. Transition probabilities learned from "
-            f"{total:,} stage-transition pairs extracted from CICIDS2017 "
-            f"({source}). "
-            f"High self-loop probabilities (e.g. IMPACT->IMPACT) reflect "
-            f"DoS/DDoS attack patterns in the dataset and are empirically "
-            f"accurate, not a modelling error."
-            if isinstance(total, int) else
-            f"Data-driven Markov chain loaded from {_MATRIX_PATH}."
-        )
-        return matrix
+        if payload.get("stage_order") == ALL_STAGES and set(matrix) == set(ALL_STAGES):
+            source = payload.get("source", "unknown source")
+            total  = payload.get("total_transitions", "unknown")
+            _MATRIX_NOTE = (
+                f"Data-driven Markov chain. Transition probabilities learned from "
+                f"{total:,} stage-transition pairs extracted from CICIDS2017 "
+                f"({source}). "
+                f"High self-loop probabilities (e.g. IMPACT->IMPACT) reflect "
+                f"DoS/DDoS attack patterns in the dataset and are empirically "
+                f"accurate, not a modelling error."
+                if isinstance(total, int) else
+                f"Data-driven Markov chain loaded from {_MATRIX_PATH}."
+            )
+            return matrix
+        else:
+            _MATRIX_NOTE = (
+                "Notice: Existing markov_transition_matrix.json uses an earlier stage list. "
+                "Using fallback until build_markov_matrix.py is run."
+            )
+            print(f"[attack_chain] {_MATRIX_NOTE}")
+            return _FALLBACK_MATRIX
     else:
         _MATRIX_NOTE = (
             "WARNING: markov_transition_matrix.json not found. "

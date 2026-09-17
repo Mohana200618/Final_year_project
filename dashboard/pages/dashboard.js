@@ -1,5 +1,24 @@
 'use strict';
 
+const THREATSCOPE_STAGES = [
+  ['NORMAL', 'Normal'],
+  ['RECONNAISSANCE', 'Reconnaissance'],
+  ['RESOURCE_DEVELOPMENT', 'Resource Development'],
+  ['INITIAL_ACCESS', 'Initial Access'],
+  ['EXECUTION', 'Execution'],
+  ['PERSISTENCE', 'Persistence'],
+  ['PRIVILEGE_ESCALATION', 'Privilege Escalation'],
+  ['STEALTH', 'Stealth'],
+  ['DEFENSE_IMPAIRMENT', 'Defense Impairment'],
+  ['CREDENTIAL_ACCESS', 'Credential Access'],
+  ['DISCOVERY', 'Discovery'],
+  ['LATERAL_MOVEMENT', 'Lateral Movement'],
+  ['COLLECTION', 'Collection'],
+  ['COMMAND_AND_CONTROL', 'Command and Control'],
+  ['EXFILTRATION', 'Exfiltration'],
+  ['IMPACT', 'Impact']
+];
+
 TS.pages = TS.pages || {};
 
 TS.pages.dashboard = {
@@ -204,17 +223,9 @@ TS.pages.dashboard = {
               <h2 class="card-title">Attack Chain</h2>
             </div>
             <div class="chain-stages" id="chainStages">
-              <div class="chain-stage inactive" data-stage="NORMAL" data-tooltip="Normal Traffic: No attack activity detected.">Normal</div>
-              <div class="chain-arrow">↓</div>
-              <div class="chain-stage inactive" data-stage="RECONNAISSANCE" data-tooltip="Recon: Attacker is gathering info and scanning for vulnerabilities.">Recon</div>
-              <div class="chain-arrow">↓</div>
-              <div class="chain-stage inactive" data-stage="INITIAL_ACCESS" data-tooltip="Initial Access: Attacker is trying to break into the network.">Initial Access</div>
-              <div class="chain-arrow">↓</div>
-              <div class="chain-stage inactive" data-stage="COMMAND_AND_CONTROL" data-tooltip="C2: Attacker compromised a system and communicates with it remotely.">C2</div>
-              <div class="chain-arrow">↓</div>
-              <div class="chain-stage inactive" data-stage="LATERAL_MOVEMENT" data-tooltip="Lateral Move: Attacker is moving through the internal network.">Lateral Move</div>
-              <div class="chain-arrow">↓</div>
-              <div class="chain-stage inactive" data-stage="IMPACT" data-tooltip="Impact: Attacker is disrupting services or destroying data.">Impact</div>
+              ${THREATSCOPE_STAGES.map(([key, label], index) =>
+                `<div class="chain-stage inactive" data-stage="${key}">${label}</div>${index < THREATSCOPE_STAGES.length - 1 ? '<div class="chain-arrow">↓</div>' : ''}`
+              ).join('')}
             </div>
             <div class="chain-prediction" id="chainPrediction">
               <div class="pred-row">
@@ -357,7 +368,7 @@ TS.pages.dashboard = {
   updateChain(chain) {
     const current = chain.current_stage;
     const predicted = chain.next_stage;
-    const STAGE_LABELS = { NORMAL: 'Normal', RECONNAISSANCE: 'Recon', INITIAL_ACCESS: 'Initial Access', COMMAND_AND_CONTROL: 'C2', LATERAL_MOVEMENT: 'Lateral Move', IMPACT: 'Impact' };
+    const STAGE_LABELS = Object.fromEntries(THREATSCOPE_STAGES);
 
     document.querySelectorAll('#chainStages .chain-stage').forEach(el => {
       const s = el.dataset.stage;
